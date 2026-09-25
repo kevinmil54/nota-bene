@@ -51,7 +51,8 @@ date-read:
 *Your Zotero highlights and annotations are imported below automatically, with page numbers. Add your own quotes too — if possible, include a page number.*
 
 {% persist "annotations" %}
-{%- for a in annotations %}
+{%- set newAnnotations = annotations | filterby("date", "dateafter", lastImportDate) %}
+{%- for a in newAnnotations %}
 {%- if a.annotatedText %}
 
 > "{{a.annotatedText}}" (p. {{a.page}})
