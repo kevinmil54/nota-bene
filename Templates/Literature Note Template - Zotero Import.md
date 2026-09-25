@@ -48,24 +48,26 @@ date-read:
 - 
 
 ## Quotes worth keeping
-*Your Zotero highlights and annotations are imported below automatically, with page numbers. Add your own quotes too — if possible, include a page number.*
+*Your Zotero highlights and comments arrive below, with page numbers, each time you sync (highlighter icon in the left ribbon). Edit or trim them freely. Add your own quotes too — if possible, include a page number.*
 
 {% persist "annotations" %}
-{%- set newAnnotations = annotations | filterby("date", "dateafter", lastImportDate) %}
 {%- for a in newAnnotations %}
+{%- set pg = a.pageLabel or a.page %}
 {%- if a.annotatedText %}
 
-> "{{a.annotatedText}}" (p. {{a.page}})
+> "{{a.annotatedText | replace("\n", " ")}}"{% if pg %} (p. {{pg}}){% endif %}
 {%- if a.comment %}
-> — *my note: {{a.comment}}*
-{%- endif %}
-{%- endif %}
-{%- if a.imageRelativePath %}
+> — *my note: {{a.comment | replace("\n", "\n> ")}}*
+{%- endif %} ^nb-{{a.nbId}}
+{%- elif a.imageRelativePath %}
 
-> ![[{{a.imageRelativePath}}]] (p. {{a.page}})
+> ![[{{a.imageRelativePath}}]]{% if pg %} (p. {{pg}}){% endif %}
 {%- if a.comment %}
-> — *my note: {{a.comment}}*
-{%- endif %}
+> — *my note: {{a.comment | replace("\n", "\n> ")}}*
+{%- endif %} ^nb-{{a.nbId}}
+{%- elif a.comment %}
+
+> *my note{% if pg %} (p. {{pg}}){% endif %}: {{a.comment | replace("\n", "\n> ")}}* ^nb-{{a.nbId}}
 {%- endif %}
 {%- endfor %}
 {% endpersist %}

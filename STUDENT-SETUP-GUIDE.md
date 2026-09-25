@@ -1,11 +1,12 @@
 # Setting Up Your Nota Bene Note System
 
 This gets your computer ready to take literature notes the Nota Bene way:
-highlight and annotate a paper in Zotero, import it into a structured note —
-your highlights arrive automatically as quotes with page numbers — take your
-own notes, and promote your best ideas into standalone permanent notes with
-one click. It's a one-time setup (30–45 minutes) — after that, each new paper
-takes seconds to turn into a note.
+read a paper in Zotero with your note open right beside it, typing your own
+notes and highlighting as you go. One click syncs your highlights into the
+note as quotes with page numbers — without touching anything you've typed —
+and one checkbox promotes your best ideas into standalone permanent notes.
+It's a one-time setup (30–45 minutes) — after that, each new paper takes
+seconds to turn into a note.
 
 Works on **Mac or Windows**. Steps are marked where they differ.
 
@@ -161,9 +162,11 @@ import"** on, so each new literature note opens automatically.
 
 ---
 
-## Generating a note for a particular article
+## Reading a paper: notes and highlights together
 
-Once setup is done, this is the whole routine per paper:
+Once setup is done, this is the whole routine per paper.
+
+### Before you start reading
 
 1. **Get the article into Zotero.** On the article's webpage, click the
    Zotero Connector button in your browser (best — pulls in full metadata).
@@ -171,31 +174,58 @@ Once setup is done, this is the whole routine per paper:
 2. **Check it saved correctly** — title, authors, and year look right in
    Zotero. If you dragged in a bare PDF and the fields are empty, right-click
    the item → **"Retrieve Metadata for PDF."**
-3. **Read the paper in Zotero's PDF reader** (double-click the PDF in
-   Zotero). As you read, **highlight passages worth keeping** and add sticky
-   comments where you have a reaction. Use Zotero's own reader for this, not
-   Preview or Adobe — Zotero's reader is what records the real (printed) page
-   number for each highlight.
-4. **In Obsidian:** Command Palette → **"Nota Bene: Zotero Import: Nota Bene
-   Literature Note"** (the command is named after the import format from step
-   4g — *not* the generic "Import notes," which skips your template).
-5. Search for the article by title or author, select it (you can multi-select
-   several at once).
-6. Obsidian creates the literature note, pre-filled with title, authors,
-   year, the Zotero link, the full APA reference — and, under **"Quotes worth
-   keeping,"** every highlight you made, as a quote with its page number.
-   Comments you attached to highlights appear under their quotes; area
-   snapshots come in as images.
-7. **Take your own notes** directly in that file — fill in "Why I'm reading
-   this," "Summary (in my own words)," "Key ideas," and so on. You can edit
-   the imported quotes freely (trim them, add reactions).
-8. **Keep reading later?** Highlight more in Zotero, then run the same import
-   command on the same article: only your *new* highlights are appended —
-   nothing you've written or edited is touched.
-9. When an idea is worth its own standalone note, write it (or accept a
-   suggested one) under **"Permanent note candidates"** and **check its
-   box** — a new permanent note is created automatically, built from the
-   Permanent Note Template, and that line becomes a link to it.
+3. **Create the literature note.** In Obsidian: Command Palette → **"Nota
+   Bene: Zotero Import: Nota Bene Literature Note"** (the command is named
+   after the import format from step 4g — *not* the generic "Import notes,"
+   which skips your template). Search for the article, select it. Obsidian
+   creates the note, pre-filled with title, authors, year, the Zotero link,
+   and the full APA reference.
+
+### While you read
+
+4. **Put the paper and the note side by side.** Open the PDF in **Zotero's
+   own reader** (double-click the PDF in Zotero) on one half of your screen,
+   and your literature note in Obsidian on the other.
+   - **Mac:** hover over a window's green button → **Tile Window to Left of
+     Screen**, then pick the other window for the right side.
+   - **Windows:** drag a window to the left edge of the screen until it
+     snaps, then pick the other window for the right side (or `Win + ←`).
+5. **Type and highlight in whatever rhythm suits you.** Highlight passages
+   worth keeping in Zotero, and add a comment to a highlight when you have a
+   reaction (click the highlight → type in its comment box). Meanwhile, type
+   your own notes straight into the literature note — "Summary (in my own
+   words)," "Key ideas," questions as they occur to you.
+   Use Zotero's reader for highlighting, not Preview or Adobe — Zotero's
+   reader is what records the real (printed) page number for each highlight.
+6. **Sync whenever you like** — after each section, each page, or only at
+   the end. Click the **highlighter icon** in Obsidian's left ribbon (or
+   Command Palette → **"Nota Bene: Zotero Import: Sync highlights into
+   current note"**) with your literature note open. Every highlight and
+   comment you've made since the last sync appears under **"Quotes worth
+   keeping,"** each with its page number. Nothing you've typed is touched —
+   it's safe to sync in the middle of a sentence.
+   - You can edit, trim, or react to imported quotes freely; syncing again
+     won't undo your edits or duplicate quotes.
+   - You can move a quote into another section (say, next to the idea it
+     supports) — it won't be re-added to the Quotes section.
+   - Each quote ends with a code like `^nb-ABCD1234`. Leave it: it's how
+     sync knows the quote is already there, and it lets you link to that
+     exact quote from a permanent note.
+   - **Tip:** give sync a keyboard shortcut — Settings → Hotkeys → search
+     "Sync highlights" → click `+` → press your shortcut (e.g. `Cmd/Ctrl +
+     Shift + S`).
+
+### After you read
+
+7. **Finish your notes** — "How this connects to other sources," "Open
+   questions," "Questions for class discussion."
+8. When an idea is worth its own standalone note, write it under
+   **"Permanent note candidates"** and **check its box** — a new permanent
+   note is created automatically, built from the Permanent Note Template, and
+   that line becomes a link to it.
+9. **Coming back to the paper later?** Just keep highlighting in Zotero and
+   sync again; new highlights are added and everything else stays as you
+   left it.
 
 ---
 
@@ -207,9 +237,13 @@ Once setup is done, this is the whole routine per paper:
 | Import fails / "could not connect to Zotero" | Zotero desktop must be running. Check Zotero → Settings → Advanced → "Allow other applications to communicate with Zotero" is checked. |
 | Citation key or reference comes out blank, or shows `{{citekey}}` literally | Better BibTeX isn't installed, or Zotero wasn't restarted after installing it. |
 | The "Import notes" command creates a blank note with just a citekey, no content | That's the generic command — it doesn't use your template. Use the command named after your import format instead ("Nota Bene: Zotero Import: Nota Bene Literature Note"), set up in step 4g. |
-| No quotes appear under "Quotes worth keeping" after import | You haven't highlighted anything yet, or the highlights were made in another PDF app (Preview, Adobe) — make them in **Zotero's** PDF reader, then re-run the import on the same article. |
-| Quotes show the wrong page numbers | Highlights made outside Zotero's reader only carry the PDF's sheet number. For printed page numbers, highlight in Zotero's reader (it can also fix the numbering under the reader's page-number field). |
-| A highlight you deleted in Zotero is still in the note | Imports only *add* new quotes; they never remove. Delete the quote line in Obsidian by hand. |
+| Sync says "No new highlights" but you just highlighted | The highlights were made in another PDF app (Preview, Adobe) — make them in **Zotero's** PDF reader. Also check the note you have open is the literature note for that paper. |
+| Sync says the note "has no citekey in its frontmatter" | Sync only works in a literature note created by the import command (step 3), which records the paper's citekey at the top of the note. Don't delete the `citekey:` line. |
+| Sync fails / "is Zotero running?" | Zotero desktop must be open. Check Zotero → Settings → Advanced → "Allow other applications to communicate with Zotero" is checked. |
+| Quotes show the PDF's sheet number instead of the printed page | The PDF has no page labels, or they're wrong. In Zotero's reader, right-click a page in the thumbnails sidebar → **Rename Page…** to set the correct number; future syncs will use it. (Quotes already synced keep their old number — edit them by hand.) |
+| A quote I deleted from the note came back after syncing | Syncing adds any highlight that isn't in the note yet. To remove a quote for good, delete the highlight in Zotero too. |
+| A highlight you deleted in Zotero is still in the note | Syncing only *adds* quotes; it never removes them. Delete the quote in Obsidian by hand. |
+| A message says the imported-quotes block "was missing" and was re-added | You deleted the hidden markers around the imported quotes; sync put the block back under "Quotes worth keeping." Nothing is lost — you can tidy up the section by hand. |
 | Checking a candidate box just crosses out the text — no new note appears | The "Second Reader: Promote Candidates" plugin isn't enabled, the note's frontmatter is missing `tags: [literature-note]`, or the heading isn't exactly `## Permanent note candidates`. |
 | BRAT can't find a plugin | Double-check the repo name: `kevinmil54/nota-bene` for the Zotero import plugin, `kevinmil54/second-reader-obsidian-promote` for Promote Candidates. |
 | Every import command appears twice in the Command Palette | Both "Nota Bene: Zotero Import" and the community "Zotero Integration" plugin are enabled — disable the community one. |

@@ -1,5 +1,12 @@
 import { copyFileSync, existsSync, mkdirSync } from 'fs';
-import { Notice, TFile, htmlToMarkdown, moment, normalizePath } from 'obsidian';
+import {
+  MarkdownView,
+  Notice,
+  TFile,
+  htmlToMarkdown,
+  moment,
+  normalizePath,
+} from 'obsidian';
 import path from 'path';
 
 import { doesEXEExist, getVaultRoot } from '../helpers';
@@ -27,6 +34,13 @@ import {
   getItemJSONFromCiteKeys,
   getItemJSONFromRelations,
 } from './jsonRPC';
+import {
+  annotationSyncId,
+  applySync,
+  planSync,
+  rebaseRendered,
+  unsyncedAnnotations,
+} from './sync';
 import { PersistExtension, renderTemplate } from './template.env';
 import {
   appendExportDate,
@@ -136,8 +150,8 @@ function convertNativeAnnotation(
   }
 
   if (annotation.annotationPosition) {
-    if (annotation.annotationPosition.pageIndex) {
-      annot.page = annotation.annotationPosition.pageIndex + 1
+    if (annotation.annotationPosition.pageIndex != null) {
+      annot.page = annotation.annotationPosition.pageIndex + 1;
     }
 
     if (annotation.annotationPosition.rects) {
@@ -577,13 +591,18 @@ async function getAttachmentData(item: any, database: DatabaseWithPort) {
 async function getTemplateData(
   markdownPath: string,
   item: any,
-  lastImportDate: moment.Moment
+  lastImportDate: moment.Moment,
+  existingNote: string
 ) {
   const firstAnnots = item.attachments.find(
     (a: any) => a.annotations?.length
   );
 
   item.annotations = firstAnnots?.annotations ?? [];
+  for (const a of item.annotations) {
+    a.nbId = annotationSyncId(a);
+  }
+  item.newAnnotations = unsyncedAnnotations(item.annotations, existingNote);
   item.lastImportDate = lastImportDate;
   item.lastExportDate = lastImportDate;
   item.isFirstImport = lastImportDate.valueOf() === 0;
@@ -591,9 +610,63 @@ async function getTemplateData(
   return await applyBasicTemplates(markdownPath, item);
 }
 
+function openEditorFor(file: TFile) {
+  for (const leaf of app.workspace.getLeavesOfType('markdown')) {
+    const view = leaf.view;
+    if (view instanceof MarkdownView && view.file === file) return view.editor;
+  }
+  return null;
+}
+
+// The open editor's buffer can be ahead of disk by a couple of seconds of
+// typing; always prefer it.
+async function readLive(file: TFile): Promise<string> {
+  const editor = openEditorFor(file);
+  return editor ? editor.getValue() : app.vault.read(file);
+}
+
+export interface MergeResult {
+  changed: boolean;
+  reinsertedBlocks: string[];
+}
+
+// Merge a render into an existing note, touching only persist blocks. Applied
+// through the open editor when there is one, so a student typing in the note
+// keeps their cursor, undo history, and any unsaved keystrokes.
+export async function mergeIntoNote(
+  file: TFile,
+  snapshot: string,
+  rendered: string
+): Promise<MergeResult> {
+  const editor = openEditorFor(file);
+  const current = editor ? editor.getValue() : await app.vault.read(file);
+  const plan = planSync(current, rebaseRendered(snapshot, current, rendered));
+
+  if (plan.edits.length) {
+    if (editor) {
+      for (const e of plan.edits) {
+        editor.replaceRange(
+          e.text,
+          editor.offsetToPos(e.start),
+          editor.offsetToPos(e.end)
+        );
+      }
+    } else {
+      await app.vault.modify(file, applySync(current, plan));
+    }
+  }
+
+  return { changed: plan.edits.length > 0, reinsertedBlocks: plan.missing };
+}
+
+export interface SyncTarget {
+  file: TFile;
+}
+
 export async function exportToMarkdown(
   params: ExportToMarkdownParams,
-  explicitCiteKeys?: CiteKey[]
+  explicitCiteKeys?: CiteKey[],
+  target?: SyncTarget
 ): Promise<string[]> {
   const importDate = moment();
   const { database, exportFormat, settings } = params;
@@ -636,12 +709,15 @@ export async function exportToMarkdown(
   > = new Map();
 
   const queueRender = async (markdownPath: string, item: any) => {
+    // Syncing renders into the note the student has open, wherever it lives
+    // and whatever it's been renamed to.
+    if (target) markdownPath = target.file.path;
     if (!toRender.has(markdownPath)) {
-      const existingMarkdownFile = app.vault.getAbstractFileByPath(
-        markdownPath
-      ) as TFile;
+      const existingMarkdownFile = target
+        ? target.file
+        : (app.vault.getAbstractFileByPath(markdownPath) as TFile);
       const existingMarkdown = existingMarkdownFile
-        ? await app.vault.read(existingMarkdownFile as TFile)
+        ? await readLive(existingMarkdownFile)
         : '';
       const existingAnnotations = existingMarkdownFile
         ? getExistingAnnotations(existingMarkdown)
@@ -800,7 +876,8 @@ export async function exportToMarkdown(
       const templateData = await getTemplateData(
         markdownPath,
         item,
-        lastImportDate
+        lastImportDate,
+        fileContent
       );
       const rendered = await renderTemplates(
         params,
@@ -811,7 +888,23 @@ export async function exportToMarkdown(
       if (!rendered) continue;
 
       if (file) {
-        await app.vault.modify(file, rendered);
+        // Nota Bene: an existing note belongs to the student. Never overwrite
+        // it — only merge new highlights into its persist blocks.
+        const newCount = templateData.newAnnotations?.length ?? 0;
+        const result = await mergeIntoNote(file, fileContent, rendered);
+        if (target) {
+          new Notice(
+            newCount
+              ? `Synced ${newCount} new highlight${newCount === 1 ? '' : 's'} into ${file.basename}`
+              : `No new highlights for ${file.basename}`
+          );
+        }
+        if (result.reinsertedBlocks.length) {
+          new Notice(
+            `The imported-quotes block was missing from ${file.basename}, so it was re-added under "Quotes worth keeping".`,
+            8000
+          );
+        }
       } else {
         await mkMDDir(markdownPath);
         await app.vault.create(markdownPath, rendered);
@@ -972,7 +1065,7 @@ export async function dataExplorerPrompt(settings: ZoteroConnectorSettings) {
 
   await Promise.all(
     itemData.map(async (data: any) => {
-      await getTemplateData('', data, moment(0));
+      await getTemplateData('', data, moment(0), '');
     })
   );
 

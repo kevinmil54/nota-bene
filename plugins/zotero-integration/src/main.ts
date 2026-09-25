@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js';
-import { EditableFileView, Events, Plugin, TFile } from 'obsidian';
+import { EditableFileView, Events, Notice, Plugin, TFile } from 'obsidian';
 import { shellPath } from 'shell-path';
 
 import { DataExplorerView, viewType } from './DataExplorerView';
@@ -122,6 +122,26 @@ export default class ZoteroConnector extends Plugin {
     });
 
     this.addCommand({
+      id: 'nb-sync-highlights',
+      name: 'Sync highlights into current note',
+      checkCallback: (checking) => {
+        const file = this.app.workspace.getActiveFile();
+        if (!file || file.extension !== 'md') return false;
+        if (!checking) this.syncHighlights(file);
+        return true;
+      },
+    });
+
+    this.addRibbonIcon('highlighter', 'Sync Zotero highlights into this note', () => {
+      const file = this.app.workspace.getActiveFile();
+      if (file?.extension === 'md') {
+        this.syncHighlights(file);
+      } else {
+        new Notice('Open a literature note first, then sync.');
+      }
+    });
+
+    this.addCommand({
       id: 'show-zotero-debug-view',
       name: 'Data explorer',
       callback: () => {
@@ -237,6 +257,62 @@ export default class ZoteroConnector extends Plugin {
       },
       [{ key: citekey, library }]
     );
+  }
+
+  // Import formats are how students configure the literature-note template;
+  // prefer the one pointing at it, since a vault may have other formats.
+  syncFormat(): ExportFormat | undefined {
+    const formats = this.settings.exportFormats;
+    return (
+      formats.find((f) => /literature note/i.test(f.templatePath ?? '')) ??
+      formats[0]
+    );
+  }
+
+  private syncing = new Set<string>();
+
+  async syncHighlights(file: TFile) {
+    const citekey =
+      this.app.metadataCache.getFileCache(file)?.frontmatter?.citekey;
+    if (!citekey || typeof citekey !== 'string') {
+      new Notice(
+        `${file.basename} has no citekey in its frontmatter, so it can't be matched to a Zotero item.`
+      );
+      return;
+    }
+
+    const format = this.syncFormat();
+    if (!format) {
+      new Notice(
+        'Set up an import format in the Nota Bene: Zotero Import settings first.'
+      );
+      return;
+    }
+
+    if (this.syncing.has(file.path)) return;
+    this.syncing.add(file.path);
+    try {
+      await exportToMarkdown(
+        {
+          settings: this.settings,
+          database: {
+            database: this.settings.database,
+            port: this.settings.port,
+          },
+          exportFormat: format,
+        },
+        [{ key: citekey.replace(/^@/, ''), library: 1 }],
+        { file }
+      );
+    } catch (e) {
+      console.error(e);
+      new Notice(
+        'Sync failed — is Zotero running? Check the developer console for details.',
+        7000
+      );
+    } finally {
+      this.syncing.delete(file.path);
+    }
   }
 
   async openNotes(createdOrUpdatedMarkdownFilesPaths: string[]) {
