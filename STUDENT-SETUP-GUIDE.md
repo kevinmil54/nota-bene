@@ -103,31 +103,37 @@ Settings (gear icon) → **Community plugins** → **Turn on community
 plugins** (you'll see a one-time warning about third-party code — this is
 expected).
 
-### b. Install "Zotero Integration"
-Settings → Community plugins → **Browse** → search **"Zotero Integration"**
-→ **Install** → **Enable**.
+### b. Install "BRAT"
+Settings → Community plugins → **Browse** → search **"BRAT"** (Beta
+Reviewers Auto-update Tool) → **Install** → **Enable**. BRAT is what lets
+you install the two custom Nota Bene plugins below, which aren't in
+Obsidian's official plugin list.
 
-<!-- When the Nota Bene fork ("Nota Bene: Zotero Import") is published on
-GitHub, replace this step with a BRAT install of the fork's repo and have
-students disable the community plugin. Until then the community plugin works
-with the Nota Bene template, including the automatic quote import. -->
+### c. Install "Nota Bene: Zotero Import"
+This is Nota Bene's own version of the Zotero Integration plugin.
 
-### c. Install "BRAT"
-Same **Browse** search, this time for **"BRAT"** (Beta Reviewers Auto-update
-Tool) → **Install** → **Enable**. BRAT is what lets you install the custom
-Nota Bene plugin below, which isn't in Obsidian's official plugin list.
-
-### d. Install "Second Reader: Promote Candidates"
 1. Command Palette (`Cmd/Ctrl+P`) → **"BRAT: Add a beta plugin for
    testing."**
+2. Paste: `kevinmil54/nota-bene`
+3. Settings → Community plugins → enable **"Nota Bene: Zotero Import."**
+
+(If you already have the community "Zotero Integration" plugin installed
+from another class, disable it — running both at once will give you two
+copies of every import command.)
+
+### d. Install "Second Reader: Promote Candidates"
+1. Command Palette → **"BRAT: Add a beta plugin for testing."**
 2. Paste: `kevinmil54/second-reader-obsidian-promote`
 3. Settings → Community plugins → enable **"Second Reader: Promote
    Candidates."**
 
 ### e. Get the two templates into your vault
 Your instructor will give you two files — **`Literature Note Template -
-Zotero Import.md`** and **`Permanent Note Template.md`**. Use the versions
-that come with Nota Bene: the literature template is what makes your Zotero
+Zotero Import.md`** and **`Permanent Note Template.md`** — or you can get
+them from
+**[the Nota Bene repo's Templates folder](https://github.com/kevinmil54/nota-bene/tree/main/Templates)**
+(open each file there and use the download button). Use the versions that
+come with Nota Bene: the literature template is what makes your Zotero
 highlights import as quotes.
 
 Create a `Templates` folder inside your vault (in Obsidian's file explorer,
@@ -138,8 +144,9 @@ Settings → **Second Reader: Promote Candidates** → **Template path** →
 enter `Templates/Permanent Note Template.md` (match the path to wherever
 you put it in step e).
 
-### g. Configure Zotero Integration's import format
-Settings → **Zotero Integration** → **Import Formats** → add a new format:
+### g. Configure the import format
+Settings → **Nota Bene: Zotero Import** → **Import Formats** → add a new
+format:
 - **Name:** `Nota Bene Literature Note`
 - **Template:** the path to `Templates/Literature Note Template - Zotero
   Import.md`
@@ -169,7 +176,7 @@ Once setup is done, this is the whole routine per paper:
    comments where you have a reaction. Use Zotero's own reader for this, not
    Preview or Adobe — Zotero's reader is what records the real (printed) page
    number for each highlight.
-4. **In Obsidian:** Command Palette → **"Zotero Integration: Nota Bene
+4. **In Obsidian:** Command Palette → **"Nota Bene: Zotero Import: Nota Bene
    Literature Note"** (the command is named after the import format from step
    4g — *not* the generic "Import notes," which skips your template).
 5. Search for the article by title or author, select it (you can multi-select
@@ -199,24 +206,25 @@ Once setup is done, this is the whole routine per paper:
 | The import command for your format doesn't appear in the Command Palette | Plugin isn't enabled, or Obsidian needs a full restart (not just a reload) after enabling it. |
 | Import fails / "could not connect to Zotero" | Zotero desktop must be running. Check Zotero → Settings → Advanced → "Allow other applications to communicate with Zotero" is checked. |
 | Citation key or reference comes out blank, or shows `{{citekey}}` literally | Better BibTeX isn't installed, or Zotero wasn't restarted after installing it. |
-| "Zotero Integration: Import notes" creates a blank note with just a citekey, no content | That's the generic command — it doesn't use your template. Use the command named after your import format instead (e.g. "Zotero Integration: Nota Bene Literature Note"), set up in step 4g. |
+| The "Import notes" command creates a blank note with just a citekey, no content | That's the generic command — it doesn't use your template. Use the command named after your import format instead ("Nota Bene: Zotero Import: Nota Bene Literature Note"), set up in step 4g. |
 | No quotes appear under "Quotes worth keeping" after import | You haven't highlighted anything yet, or the highlights were made in another PDF app (Preview, Adobe) — make them in **Zotero's** PDF reader, then re-run the import on the same article. |
 | Quotes show the wrong page numbers | Highlights made outside Zotero's reader only carry the PDF's sheet number. For printed page numbers, highlight in Zotero's reader (it can also fix the numbering under the reader's page-number field). |
 | A highlight you deleted in Zotero is still in the note | Imports only *add* new quotes; they never remove. Delete the quote line in Obsidian by hand. |
 | Checking a candidate box just crosses out the text — no new note appears | The "Second Reader: Promote Candidates" plugin isn't enabled, the note's frontmatter is missing `tags: [literature-note]`, or the heading isn't exactly `## Permanent note candidates`. |
-| BRAT can't find the plugin | Double-check the repo name is exactly `kevinmil54/second-reader-obsidian-promote`. |
-| Reference style isn't APA | You likely set the "Citation Style" (used for inline citations) instead of the **Import Format's own "Bibliography Style"** field — these are two separate settings in Zotero Integration. |
+| BRAT can't find a plugin | Double-check the repo name: `kevinmil54/nota-bene` for the Zotero import plugin, `kevinmil54/second-reader-obsidian-promote` for Promote Candidates. |
+| Every import command appears twice in the Command Palette | Both "Nota Bene: Zotero Import" and the community "Zotero Integration" plugin are enabled — disable the community one. |
+| Reference style isn't APA | You likely set the "Citation Style" (used for inline citations) instead of the **Import Format's own "Bibliography Style"** field — these are two separate settings in the plugin. |
 
 ---
 
 ## Updating
 
-- **Second Reader: Promote Candidates** updates automatically through BRAT
-  (BRAT checks for new versions when Obsidian starts). To check manually:
-  Command Palette → **"BRAT: Check for updates to all beta plugins and
-  UPDATE."**
-- **Zotero Integration** and **BRAT** update like any community plugin:
-  Settings → Community plugins → **Check for updates**.
+- **Nota Bene: Zotero Import** and **Second Reader: Promote Candidates**
+  update automatically through BRAT (BRAT checks for new versions when
+  Obsidian starts). To check manually: Command Palette → **"BRAT: Check for
+  updates to all beta plugins and UPDATE."**
+- **BRAT** itself updates like any community plugin: Settings → Community
+  plugins → **Check for updates**.
 - **Templates** don't update themselves — if your instructor announces a new
   template version, download it and replace the file in your vault's
   `Templates` folder. Existing notes keep whatever template they were created
